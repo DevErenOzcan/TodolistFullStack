@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: ingress
+data:
+  DB_NAME: "todolist"
+  DB_HOST: "host.minikube.internal"
+  DB_PORT: "3306"
+  BACKEND_PORT: "8080"
+  CORS_ALLOW_ORIGINS: "http://todolist.kubernetes.com"
+  REACT_APP_API_BASE_URL: "http://todolist.kubernetes.com"

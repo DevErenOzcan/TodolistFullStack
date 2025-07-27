@@ -1,0 +1,58 @@
+package routes
+
+import (
+	"github.com/gin-gonic/gin"
+	"todo_list_project/controllers"
+	"todo_list_project/middleware"
+)
+
+// SetupRoutes tüm route'ları yapılandırır
+func SetupRoutes(router *gin.Engine) {
+	// API grubu oluştur
+	api := router.Group("/api")
+
+	// Auth endpoints - JWT middleware olmadan
+	authGroup := api.Group("/auth")
+	{
+		authGroup.POST("/login", controller.Login)
+	}
+
+	// Protected endpoints - JWT middleware ile
+	protectedGroup := api.Group("")
+	protectedGroup.Use(middleware.JWTMiddleware("jwtsecretkey"))
+	{
+		// Todo endpoints
+		todoGroup := protectedGroup.Group("/todos")
+		{
+			todoGroup.GET("", controller.GetAllTodos)
+			todoGroup.POST("", controller.CreateTodo)
+			todoGroup.GET("/:id", controller.GetTodoByID)
+			todoGroup.PUT("/:id", controller.UpdateTodo)
+			todoGroup.DELETE("/:id", controller.DeleteTodo)
+		}
+
+		// Step endpoints
+		stepGroup := protectedGroup.Group("/steps")
+		{
+			// Todo ID ile step işlemleri
+			stepGroup.GET("/todo/:todo_id", controller.GetStepsByTodoID)
+			stepGroup.POST("/todo/:todo_id", controller.CreateStep)
+
+			// Step ID ile işlemler
+			stepGroup.GET("/:step_id", controller.GetStepByID)
+			stepGroup.PUT("/:step_id", controller.UpdateStep)
+			stepGroup.DELETE("/:step_id", controller.DeleteStep)
+		}
+	}
+}
+
+// Deprecated: Eski fonksiyonlar - geriye dönük uyumluluk için
+func MainRoutes(router *gin.Engine) {
+	// Bu fonksiyon artık kullanılmıyor, SetupRoutes kullanın
+	SetupRoutes(router)
+}
+
+func Apis(router *gin.Engine) {
+	// Bu fonksiyon artık kullanılmıyor, SetupRoutes kullanın
+	SetupRoutes(router)
+}

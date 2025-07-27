@@ -1,0 +1,168 @@
+trigger:
+  - dev
+
+pool:
+  name: DevOpsLinuxPoolNew
+
+variables:
+  dockerHubUsername: 'erenozcan17'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildBackend
+        displayName: 'Build Backend'
+        steps:
+          - task: GoTool@0
+            inputs:
+              version: '1.20'
+          - script: |
+              cd go_backend
+              go build -v -o app-backend
+            displayName: 'Build Go Backend'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(System.DefaultWorkingDirectory)/go_backend/app-backend'
+              artifactName: 'BackendArtifact'
+            displayName: 'Publish Backend Artifact'
+      - job: BuildFrontend
+        displayName: 'Build Frontend'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+          - script: |
+              cd react_frontend
+              npm install
+              npm run build
+            displayName: 'Build React Frontend'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(System.DefaultWorkingDirectory)/react_frontend/build'
+              artifactName: 'FrontendArtifact'
+            displayName: 'Publish Frontend Artifact'
+
+  - stage: Test
+    dependsOn: Build
+    jobs:
+      - job: TestGoBackend
+        displayName: 'Test Go Backend'
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              artifactName: 'BackendArtifact'
+            displayName: 'Download Backend Artifact'
+          - task: GoTool@0
+            inputs:
+              version: '1.20'
+          - script: |
+              cd $(System.DefaultWorkingDirectory)/go_backend 
+              go test -v simple_test.go
+            displayName: 'Run Go Backend Tests'
+      - job: TestReactFrontend
+        displayName: 'Test React Frontend'
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              artifactName: 'FrontendArtifact'
+            displayName: 'Download Frontend Artifact'
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+          - script: |
+              cd $(System.DefaultWorkingDirectory)/react_frontend
+              npm install
+              npm test -- --watchAll=false
+            displayName: 'Run React Frontend Tests'
+
+  - stage: SonarQube
+    dependsOn: Build
+    jobs:
+      - job: SonarQubeAnalysis
+        displayName: 'SonarQube Analysis'
+        steps:
+          - task: GoTool@0
+            inputs:
+              version: '1.20'
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+          - task: sonarsource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@7
+            displayName: 'Prepare analysis on SonarQube'
+            inputs:
+              SonarQube: 'SonarqubeNew-NewChapter2.0'
+              scannerMode: 'CLI'
+              configMode: 'manual'
+              cliProjectKey: $(Build.DefinitionName)
+              cliSources: '.'
+          - script: |
+              # Install dependencies for frontend
+              cd react_frontend
+              npm install
+              npm run build
+              cd ..
+              # Build backend
+              cd go_backend
+              go build -v .
+              cd ..
+            displayName: 'Build projects for analysis'
+          - task: sonarsource.sonarqube.6D01813A-9589-4B15-8491-8164AEB38055.SonarQubeAnalyze@7
+            displayName: 'Run Code Analysis'
+          - task: sonarsource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@7
+            displayName: 'Publish Quality Gate Result'
+
+  - stage: Dockerize
+    displayName: 'Dockerize'
+    dependsOn:
+      - Test
+      - SonarQube
+    jobs:
+      - job: BackendDockerImage
+        displayName: 'Backend Docker Image'
+        steps:
+          - task: Docker@2
+            displayName: 'Build and Push Backend Image'
+            inputs:
+              containerRegistry: 'dockerhub'
+              repository: '$(dockerHubUsername)/go_backend'  # Use your Docker Hub username
+              command: 'buildAndPush'
+              Dockerfile: 'go_backend/Dockerfile'
+              tags: |
+                $(Build.BuildId)
+                latest
+      - job: FrontendDockerImage
+        displayName: 'Frontend Docker Image'
+        steps:
+          - task: Docker@2
+            displayName: 'Build and Push Frontend Image'
+            inputs:
+              containerRegistry: 'dockerhub'
+              repository: '$(dockerHubUsername)/react_frontend'  # Use your Docker Hub username
+              command: 'buildAndPush'
+              Dockerfile: 'react_frontend/Dockerfile'
+              tags: |
+                $(Build.BuildId)
+                latest
+
+  - stage: SecurityScan
+    jobs:
+      - job: ScanFrontendContainer
+        displayName: 'Security Scan for Frontend Container'
+        steps:
+          - task: trivy@2
+            displayName: 'Security Scan for React Container'
+            inputs:
+              version: 'latest'
+              type: 'image'
+              target: 'erenozcan17/react_frontend:$(Build.BuildId)'
+#      - job: ScanBackendContainer
+#        displayName: 'Security Scan for Backend Container'
+#        steps:
+#          - task: trivy@2
+#            displayName: 'Security Scan for Backend Container'
+#            inputs:
+#              version: 'latest'
+#              type: 'image'
+#              target: 'erenozcan17/go_backend:$(Build.BuildId)'

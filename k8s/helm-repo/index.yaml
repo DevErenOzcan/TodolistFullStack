@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  helm:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-07-27T11:38:18.731746247+03:00"
+    description: A Helm chart for Kubernetes
+    digest: 3d51b43d6aef53ff1f8c78e4af3fa0ac886a0f418daebe9555e5ee260e1c0e1c
+    name: helm
+    type: application
+    urls:
+    - https://DevErenOzcan.github.io/helm-repo/helm-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-07-27T11:38:18.73134714+03:00"
