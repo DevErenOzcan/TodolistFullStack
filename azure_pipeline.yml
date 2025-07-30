@@ -150,6 +150,7 @@ stages:
     jobs:
       - job: ScanFrontendContainer
         displayName: 'Security Scan for Frontend Container'
+        continueOnError: true
         steps:
           - task: trivy@2
             displayName: 'Security Scan for React Container'
@@ -157,12 +158,13 @@ stages:
               version: 'latest'
               type: 'image'
               target: 'erenozcan17/react_frontend:$(Build.BuildId)'
-#      - job: ScanBackendContainer
-#        displayName: 'Security Scan for Backend Container'
-#        steps:
-#          - task: trivy@2
-#            displayName: 'Security Scan for Backend Container'
-#            inputs:
-#              version: 'latest'
-#              type: 'image'
-#              target: 'erenozcan17/go_backend:$(Build.BuildId)'
+      - job: ScanBackendContainer
+        displayName: 'Security Scan for Backend Container'
+        continueOnError: true
+        steps:
+          - task: trivy@2
+            displayName: 'Security Scan for Backend Container'
+            inputs:
+              version: 'latest'
+              type: 'image'
+              target: 'erenozcan17/go_backend:$(Build.BuildId)'
