@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 	"todo_list_project/database"
 	"todo_list_project/models"
 )
@@ -24,7 +25,21 @@ func CreateTodo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Set user ID from JWT token
 	newTodo.UserID = c.GetUint("user_id")
+
+	// Set timestamps
+	now := time.Now()
+	newTodo.CreatedDate = now
+	newTodo.UpdatedDate = now
+
+	// Set default values if not provided
+	if newTodo.CompletePerc == 0 {
+		newTodo.CompletePerc = 0.0
+	}
+	newTodo.IsDeleted = false
+
 	created, err := database.AddTodo(newTodo)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create todo"})

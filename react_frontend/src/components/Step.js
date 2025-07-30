@@ -107,7 +107,7 @@ const Step = () => {
     if (!updateStepName.trim()) return;
 
     try {
-      const response = await authenticatedFetch(API_ENDPOINTS.STEP_BY_ID(currentStep.ID), {
+      const response = await authenticatedFetch(API_ENDPOINTS.STEP_BY_ID(currentStep.id), {
         method: 'PUT',
         body: JSON.stringify({ name: updateStepName })
       });

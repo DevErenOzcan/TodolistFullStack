@@ -91,9 +91,9 @@ const Todo = () => {
     if (!updateTaskName.trim()) return;
 
     try {
-      const response = await authenticatedFetch(API_ENDPOINTS.TODO_BY_ID(currentTask.ID), {
+      const response = await authenticatedFetch(API_ENDPOINTS.TODO_BY_ID(currentTask.id), {
         method: 'PUT',
-        body: JSON.stringify({ todo_name: updateTaskName })
+        body: JSON.stringify({ name: updateTaskName })
       });
 
       if (response.ok) {

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 	"todo_list_project/database"
 	"todo_list_project/models"
 )
@@ -47,6 +48,13 @@ func CreateStep(c *gin.Context) {
 	}
 
 	newStep.TodoID = uint(todoID)
+	// Set timestamps
+	now := time.Now()
+	newStep.CreatedDate = now
+	newStep.UpdatedDate = now
+
+	// Set default values if not provided
+	newStep.IsDeleted = false
 
 	createdStep, err := database.AddStep(newStep)
 	if err != nil {

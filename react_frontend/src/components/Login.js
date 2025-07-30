@@ -26,14 +26,14 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
 
-        // LAN'da çalışması için cookie ayarlarını düzenle
-        // Secure flag'ini kaldır ve samesite'ı lax yap
+        // Store the JWT token and username in cookies
         const cookieOptions = `path=/; max-age=${60 * 60 * 24}; samesite=lax`;
-        document.cookie = `auth_token=${data.token}; ${cookieOptions}`;
-        document.cookie = `username=${data.username}; ${cookieOptions}`;
 
-        // Debug: Cookie'lerin ayarlandığını kontrol et
-        console.log('Cookies set:', document.cookie);
+        // Set the auth token cookie
+        document.cookie = `auth_token=${data.token}; ${cookieOptions}`;
+
+        // Set the username cookie
+        document.cookie = `username=${data.username}; ${cookieOptions}`;
 
         // Navigate to todo page using React Router
         navigate('/todo');

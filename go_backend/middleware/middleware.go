@@ -10,16 +10,20 @@ import (
 
 func JWTMiddleware(secretKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// CORS header'larını her zaman ekle
+		c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, Cookie")
+
 		// Handle preflight OPTIONS requests
 		if c.Request.Method == "OPTIONS" {
-			c.Next()
+			c.AbortWithStatus(http.StatusOK)
 			return
 		}
 
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
-			c.Header("Access-Control-Allow-Credentials", "true")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
 			return
 		}
@@ -41,8 +45,6 @@ func JWTMiddleware(secretKey string) gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
-			c.Header("Access-Control-Allow-Credentials", "true")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
@@ -50,8 +52,6 @@ func JWTMiddleware(secretKey string) gin.HandlerFunc {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			userID, ok := claims["user_id"].(float64)
 			if !ok {
-				c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
-				c.Header("Access-Control-Allow-Credentials", "true")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user_id not found in token"})
 				return
 			}
@@ -61,9 +61,6 @@ func JWTMiddleware(secretKey string) gin.HandlerFunc {
 				c.Set("username", username)
 			}
 		} else {
-			// eğer user id alınamadıysa isteği middleware dan geçirmiyorum.
-			c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
-			c.Header("Access-Control-Allow-Credentials", "true")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			return
 		}
