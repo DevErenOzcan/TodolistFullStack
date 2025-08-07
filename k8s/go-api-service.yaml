@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: go-api-service
-  namespace: ingress
+  namespace: todolist
 spec:
   selector:
     app: go-api

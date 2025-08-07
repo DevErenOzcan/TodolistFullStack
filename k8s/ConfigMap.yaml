@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: config
-  namespace: ingress
+  namespace: todolist
 data:
   DB_NAME: "todolist"
   DB_HOST: "host.minikube.internal"

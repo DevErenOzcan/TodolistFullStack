@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: go-api-deployment
-  namespace: ingress
+  namespace: todolist
   labels:
     app: go-api
 spec:
