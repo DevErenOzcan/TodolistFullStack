@@ -2,12 +2,16 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"todo_list_project/controllers"
 	"todo_list_project/middleware"
 )
 
 // SetupRoutes tüm route'ları yapılandırır
 func SetupRoutes(router *gin.Engine) {
+	// Add Prometheus metrics endpoint
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
 	// API grubu oluştur
 	api := router.Group("/api")
 

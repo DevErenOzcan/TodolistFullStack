@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"todo_list_project/middleware"
 	"todo_list_project/routes"
 )
 
@@ -16,6 +17,9 @@ func main() {
 	allowOrigins := strings.Split(origins, ",")
 
 	r := gin.Default()
+
+	// Add Prometheus metrics middleware
+	r.Use(middleware.PrometheusMiddleware())
 
 	// CORS middleware'i uygula
 	r.Use(cors.New(cors.Config{

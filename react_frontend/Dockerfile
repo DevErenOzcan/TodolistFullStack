@@ -37,4 +37,3 @@ EXPOSE 80
 
 # Startup script'i ile nginx'i başlat
 CMD ["/start.sh"]
-
