@@ -6,7 +6,7 @@ metadata:
   labels:
     app: go-api
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: go-api
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: go-api
-          image: erenozcan17/go_backend:v2.0
+          image: erenozcan17/go_backend:v4.1
           ports:
             - containerPort: 8080
           env:

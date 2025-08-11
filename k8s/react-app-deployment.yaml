@@ -6,7 +6,7 @@ metadata:
   labels:
     app: react-app
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: react-app
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: react-app
-          image: erenozcan17/react_frontend:v3.3
+          image: erenozcan17/react_frontend:v4.0
           ports:
             - containerPort: 80
           env:
