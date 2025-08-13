@@ -27,8 +27,8 @@ spec:
           - '--web.console.templates=/etc/prometheus/consoles'
           - '--storage.tsdb.retention.time=200h'
           - '--web.enable-lifecycle'
-          - '--web.route-prefix=/'
           - '--web.external-url=http://todolist.kubernetes.local/prometheus'
+          - '--web.route-prefix=/prometheus'
         volumeMounts:
         - name: prometheus-config-volume
           mountPath: /etc/prometheus/
@@ -48,19 +48,3 @@ spec:
           name: prometheus-config
       - name: prometheus-storage-volume
         emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: prometheus-service
-  namespace: todolist
-  labels:
-    app: prometheus
-spec:
-  selector:
-    app: prometheus
-  ports:
-  - name: web
-    port: 9090
-    targetPort: 9090
-  type: ClusterIP

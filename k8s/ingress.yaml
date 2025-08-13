@@ -18,20 +18,15 @@ spec:
                 name: go-api-service
                 port:
                   number: 8080
-          - path: /analytics
+
+          - path: /prometheus
             pathType: Prefix
-            backend:
-              service:
-                name: flask-analytics-service
-                port:
-                  number: 5000
-          - path: /prometheus(/|$)(.*)
-            pathType: ImplementationSpecific
             backend:
               service:
                 name: prometheus-service
                 port:
                   number: 9090
+
           - path: /grafana
             pathType: Prefix
             backend:
@@ -39,6 +34,15 @@ spec:
                 name: grafana-service
                 port:
                   number: 3000
+
+          - path: /analytics
+            pathType: Prefix
+            backend:
+              service:
+                name: flask-analytics-service
+                port:
+                  number: 5000
+
           - path: /
             pathType: Prefix
             backend:
@@ -46,3 +50,4 @@ spec:
                 name: react-app-service
                 port:
                   number: 80
+

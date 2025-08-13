@@ -11,8 +11,7 @@ data:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://prometheus-service:9090
+        url: http://todolist.kubernetes.local/prometheus
         uid: prometheus
         isDefault: true
         editable: true
-
