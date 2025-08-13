@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-analytics-deployment
+  namespace: todolist
+  labels:
+    app: flask-analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-analytics
+  template:
+    metadata:
+      labels:
+        app: flask-analytics
+    spec:
+      containers:
+      - name: flask-analytics
+        image: erenozcan17/flask_analytics:v1.2
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PROMETHEUS_URL
+          value: "http://todolist.kubernetes.local/prometheus"
+        - name: LLM_URL
+          value: "http://todolist.kubernetes.local/analytics"
+        - name: FLASK_APP
+          value: "app.py"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+

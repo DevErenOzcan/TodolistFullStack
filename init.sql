@@ -2,6 +2,13 @@
 CREATE DATABASE IF NOT EXISTS todolist CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE todolist;
 
+-- Create MySQL exporter user for monitoring
+CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY 'exporter_password';
+GRANT PROCESS, REPLICATION CLIENT ON *.* TO 'exporter'@'%';
+GRANT SELECT ON performance_schema.* TO 'exporter'@'%';
+GRANT SELECT ON information_schema.* TO 'exporter'@'%';
+FLUSH PRIVILEGES;
+
 -- Create users table
 CREATE TABLE users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
