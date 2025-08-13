@@ -1,0 +1,51 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'todolist-backend'
+    static_configs:
+      - targets: ['todolist_backend:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Frontend monitoring via Blackbox Exporter
+  - job_name: 'todolist-frontend-blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://todolist_frontend:80
+        - http://todolist_frontend:80/login
+        - http://todolist_frontend:80/todos
+        - http://todolist_frontend:80/steps
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  # Blackbox Exporter self-monitoring
+  - job_name: 'blackbox-exporter'
+    static_configs:
+      - targets: ['blackbox:9115']
+
+  - job_name: 'mysql-exporter'
+    static_configs:
+      - targets: [ 'todolist_mysqld_exporter:9104' ]
+
+  # Node Exporter for System Metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['todolist_node_exporter:9100']

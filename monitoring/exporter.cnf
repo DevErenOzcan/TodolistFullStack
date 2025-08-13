@@ -1,0 +1,5 @@
+[client]
+user=todolist_user
+password=Localpass.
+host=mysql
+port=3306

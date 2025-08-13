@@ -72,7 +72,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -94,11 +94,58 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - prometheus
+    networks:
+      - todolist_network
+
+  # Blackbox Exporter for Frontend Monitoring
+  blackbox:
+    image: prom/blackbox-exporter:latest
+    container_name: todolist_blackbox
+    restart: unless-stopped
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./monitoring/blackbox.yml:/config/blackbox.yml:ro
+    command:
+      - '--config.file=/config/blackbox.yml'
+    networks:
+      - todolist_network
+
+  # MySQL Exporter for Database Monitoring
+  mysqld_exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: todolist_mysqld_exporter
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/exporter.cnf:/etc/mysqld_exporter/exporter.cnf # Yerel dosyayı konteynere bağlar
+    command: --config.my-cnf=/etc/mysqld_exporter/exporter.cnf # Exporter'a hangi dosyayı okuyacağını söyler
+    ports:
+      - "9104:9104"
+    depends_on:
+      - mysql
+    networks:
+      - todolist_network
+
+  # Node Exporter for System Metrics
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: todolist_node_exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
       - todolist_network
 
