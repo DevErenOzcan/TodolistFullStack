@@ -149,6 +149,28 @@ services:
     networks:
       - todolist_network
 
+  # Flask Analytics App
+  flask_analytics:
+    build:
+      context: ./flask_app
+      dockerfile: Dockerfile
+    container_name: todolist_flask_analytics
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PROMETHEUS_URL=http://prometheus:9090
+    depends_on:
+      - prometheus
+    networks:
+      - todolist_network
+    models:
+      - llm
+
+models:
+  llm:
+    model: ai/qwen3:8B-Q4_0
+
 volumes:
   mysql_data:
   prometheus_data:

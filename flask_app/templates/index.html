@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prometheus Metrik Analizi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                Prometheus Metrik Analizi
+            </a>
+            <div class="d-flex">
+                <button class="btn btn-outline-light me-2" onclick="showHistory()">
+                    <i class="fas fa-history"></i> Geçmiş
+                </button>
+                <button class="btn btn-outline-light" onclick="location.reload()">
+                    <i class="fas fa-refresh"></i> Yenile
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Kontrol Paneli -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>Analiz Kontrolleri
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-md-4">
+                                <label for="maxWorkers" class="form-label">Paralel Worker Sayısı</label>
+                                <input type="number" class="form-control" id="maxWorkers" value="10" min="1" max="50">
+                            </div>
+                            <div class="col-md-4">
+                                <button id="analyzeBtn" class="btn btn-primary btn-lg" onclick="startAnalysis()">
+                                    <i class="fas fa-play me-2"></i>Analizi Başlat
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <div id="status" class="alert alert-info mb-0" style="display: none;">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <span id="statusText">Hazır</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- İlerleme Çubuğu -->
+        <div class="row mb-4" id="progressSection" style="display: none;">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-tasks me-2"></i>İşlem Durumu
+                        </h6>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar" style="width: 0%;">
+                                <span id="progressText">0%</span>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="metric-item">
+                                    <h5 id="processedCount" class="text-primary">0</h5>
+                                    <small class="text-muted">İşlenen</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-item">
+                                    <h5 id="successCount" class="text-success">0</h5>
+                                    <small class="text-muted">Başarılı</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-item">
+                                    <h5 id="failedCount" class="text-danger">0</h5>
+                                    <small class="text-muted">Başarısız</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analiz Sonuçları -->
+        <div class="row" id="resultsSection" style="display: none;">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>LLM Analiz Raporu
+                        </h5>
+                        <div>
+                            <span id="analysisTime" class="badge bg-info"></span>
+                            <button class="btn btn-sm btn-outline-primary ms-2" onclick="downloadReport()">
+                                <i class="fas fa-download"></i> İndir
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="analysisContent" class="analysis-content">
+                            <!-- LLM analiz sonucu buraya gelecek -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrik Özeti -->
+        <div class="row mt-4" id="metricsSection" style="display: none;">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Metrik Özeti
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>İstatistikler</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Toplam İşlenen:</strong> <span id="totalProcessed">-</span></li>
+                                    <li><strong>Başarılı:</strong> <span id="totalSuccessful">-</span></li>
+                                    <li><strong>Veri İçeren:</strong> <span id="totalWithData">-</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Örnek Metrikler</h6>
+                                <div id="sampleMetrics" class="sample-metrics">
+                                    <!-- Örnek metrikler buraya gelecek -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Geçmiş Modal -->
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-history me-2"></i>Analiz Geçmişi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="historyContent">
+                        <!-- Geçmiş analizler buraya gelecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
