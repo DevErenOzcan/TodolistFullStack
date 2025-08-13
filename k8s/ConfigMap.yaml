@@ -5,8 +5,8 @@ metadata:
   namespace: todolist
 data:
   DB_NAME: "todolist"
-  DB_HOST: "host.minikube.internal"
+  DB_HOST: "mysql-service"
   DB_PORT: "3306"
   BACKEND_PORT: "8080"
-  CORS_ALLOW_ORIGINS: "http://todolist.kubernetes.com"
-  REACT_APP_API_BASE_URL: "http://todolist.kubernetes.com"
+  CORS_ALLOW_ORIGINS: "http://todolist.kubernetes.local"
+  REACT_APP_API_BASE_URL: "http://todolist.kubernetes.local"

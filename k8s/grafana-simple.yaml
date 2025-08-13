@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-simple
+  namespace: todolist
+  labels:
+    app: grafana-simple
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-simple
+  template:
+    metadata:
+      labels:
+        app: grafana-simple
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: "admin"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
