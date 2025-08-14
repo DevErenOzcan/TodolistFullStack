@@ -30,8 +30,8 @@ async function startAnalysis() {
         // Progress takibi başlat
         startProgressTracking();
 
-        // Analiz API'sini çağır
-        const response = await fetch('/api/analyze', {
+        // Analiz API'sini çağır - /analytics prefix ile
+        const response = await fetch('/analytics/api/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -50,9 +50,7 @@ async function startAnalysis() {
         } else {
             showStatus(`Hata: ${result.error}`, 'danger');
         }
-
     } catch (error) {
-        console.error('Analiz hatası:', error);
         showStatus(`Bağlantı hatası: ${error.message}`, 'danger');
     } finally {
         // UI'ı sıfırla
@@ -67,7 +65,7 @@ async function startAnalysis() {
 function startProgressTracking() {
     progressInterval = setInterval(async () => {
         try {
-            const response = await fetch('/api/progress');
+            const response = await fetch('/analytics/api/progress');
             const data = await response.json();
             
             updateProgress(data.processed, data.successful);
@@ -144,7 +142,7 @@ function displayResults(result) {
 // Mevcut analizi yükle
 async function loadCurrentAnalysis() {
     try {
-        const response = await fetch('/api/current');
+        const response = await fetch('/analytics/api/current');
         if (response.ok) {
             const result = await response.json();
             currentAnalysis = result;
@@ -158,7 +156,7 @@ async function loadCurrentAnalysis() {
 // Geçmişi göster
 async function showHistory() {
     try {
-        const response = await fetch('/api/history');
+        const response = await fetch('/analytics/api/history');
         const history = await response.json();
         
         const historyContent = document.getElementById('historyContent');

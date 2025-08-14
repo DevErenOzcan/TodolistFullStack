@@ -50,4 +50,3 @@ spec:
                 name: react-app-service
                 port:
                   number: 80
-

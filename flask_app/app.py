@@ -9,6 +9,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+# Configure Flask to work with /analytics prefix
+app.config['APPLICATION_ROOT'] = '/analytics'
+
 # Konfigürasyon - ortam değişkenlerinden al
 PROMETHEUS_URL = os.getenv("PROMETHEUS_URL")
 LLM_URL = os.getenv("LLM_URL") + "chat/completions"
@@ -213,13 +216,20 @@ def fetch_and_analyze_metrics(max_workers=10):
     
     return result
 
-# Flask Routes
-@app.route('/')
+# Flask Routes with /analytics prefix
+@app.route('/analytics')
+@app.route('/analytics/')
 def index():
     """Ana sayfa"""
     return render_template('index.html')
 
-@app.route('/api/analyze', methods=['POST'])
+@app.route('/analytics/static/<path:filename>')
+def analytics_static(filename):
+    """Static dosyaları serve et"""
+    from flask import send_from_directory
+    return send_from_directory('static', filename)
+
+@app.route('/analytics/api/analyze', methods=['POST'])
 def analyze_metrics():
     """Metrik analizi başlat"""
     try:
@@ -232,7 +242,7 @@ def analyze_metrics():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/progress')
+@app.route('/analytics/api/progress')
 def get_progress():
     """İşlem durumunu döndür"""
     processed, successful = progress_counter.get_counts()
@@ -241,7 +251,7 @@ def get_progress():
         "successful": successful
     })
 
-@app.route('/api/current')
+@app.route('/analytics/api/current')
 def get_current_analysis():
     """Mevcut analizi döndür"""
     if current_analysis:
@@ -249,10 +259,37 @@ def get_current_analysis():
     else:
         return jsonify({"error": "Henüz analiz yapılmadı"}), 404
 
-@app.route('/api/history')
+@app.route('/analytics/api/history')
 def get_analysis_history():
     """Analiz geçmişini döndür"""
     return jsonify(analysis_history[-10:])  # Son 10 analizi döndür
+
+# Keep the original routes for backward compatibility
+@app.route('/')
+def root_redirect():
+    """Root path'i analytics'e yönlendir"""
+    from flask import redirect
+    return redirect('/analytics')
+
+@app.route('/api/analyze', methods=['POST'])
+def analyze_metrics_compat():
+    """Backward compatibility"""
+    return analyze_metrics()
+
+@app.route('/api/progress')
+def get_progress_compat():
+    """Backward compatibility"""
+    return get_progress()
+
+@app.route('/api/current')
+def get_current_analysis_compat():
+    """Backward compatibility"""
+    return get_current_analysis()
+
+@app.route('/api/history')
+def get_analysis_history_compat():
+    """Backward compatibility"""
+    return get_analysis_history()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
