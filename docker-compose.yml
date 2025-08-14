@@ -160,21 +160,41 @@ services:
       - "5000:5000"
     environment:
       - PROMETHEUS_URL=http://prometheus:9090
+      - OLLAMA_URL=http://ollama:11434
+      - OLLAMA_MODEL=qwen3:latest
     depends_on:
-      - prometheus
+      prometheus:
+        condition: service_started
+      ollama:
+        condition: service_healthy
     networks:
       - todolist_network
-    models:
-      - llm
 
-models:
-  llm:
-    model: ai/qwen3:8B-Q4_0
+  # Ollama AI Model Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: todolist_ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - todolist_network
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 volumes:
   mysql_data:
   prometheus_data:
   grafana_data:
+  ollama_data:
 
 networks:
   todolist_network:

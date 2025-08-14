@@ -13,8 +13,9 @@ app = Flask(__name__)
 app.config['APPLICATION_ROOT'] = '/analytics'
 
 # Konfigürasyon - ortam değişkenlerinden al
-PROMETHEUS_URL = os.getenv("PROMETHEUS_URL")
-LLM_URL = os.getenv("LLM_URL") + "chat/completions"
+PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3:latest")
 
 # Thread-safe counter for progress tracking
 class ProgressCounter:
@@ -102,9 +103,49 @@ def fetch_single_metric(metric_name, total_metrics, counter):
     else:
         return metric_name, None
 
-def send_metrics_to_llm(metrics_data, model="ai/qwen3:8B-Q4_0"):
-    """Toplanan metrik verilerini LLM'e gönderir ve analiz ister."""
-    
+def ensure_ollama_model():
+    """Ollama'da gerekli modelin mevcut olduğundan emin olur, yoksa indirir."""
+    try:
+        # Mevcut modelleri kontrol et
+        response = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+        response.raise_for_status()
+
+        models_data = response.json()
+        model_names = [model['name'] for model in models_data.get('models', [])]
+
+        if OLLAMA_MODEL not in model_names:
+            print(f"Model {OLLAMA_MODEL} bulunamadı, indiriliyor...")
+
+            # Modeli indir
+            pull_payload = {"name": OLLAMA_MODEL}
+            pull_response = requests.post(
+                f"{OLLAMA_URL}/api/pull",
+                headers={"Content-Type": "application/json"},
+                json=pull_payload,
+                timeout=300  # 5 dakika timeout
+            )
+
+            if pull_response.status_code == 200:
+                print(f"Model {OLLAMA_MODEL} başarıyla indirildi")
+                return True
+            else:
+                print(f"Model indirme başarısız: {pull_response.status_code}")
+                return False
+        else:
+            print(f"Model {OLLAMA_MODEL} zaten mevcut")
+            return True
+
+    except Exception as e:
+        print(f"Model kontrolü/indirme hatası: {str(e)}")
+        return False
+
+def send_metrics_to_ollama(metrics_data):
+    """Toplanan metrik verilerini Ollama'ya gönderir ve analiz ister."""
+
+    # Önce modelin mevcut olduğundan emin ol
+    if not ensure_ollama_model():
+        return "Gerekli AI modeli indirilemedi. Lütfen Ollama servisini kontrol edin."
+
     # Metrik verilerini özetleyici bir format hazırla
     metrics_summary = {
         "total_metrics": len(metrics_data),
@@ -112,60 +153,95 @@ def send_metrics_to_llm(metrics_data, model="ai/qwen3:8B-Q4_0"):
         "sample_metrics": list(metrics_data.keys())[:10]
     }
 
-    # LLM için sistem mesajı
-    system_message = """Sen Prometheus metriklerini analiz eden uzman bir sistem yöneticisisin. 
-    Verilen metrik verilerini analiz et ve şunları yap:
-    1. Sistem durumu hakkında genel bir değerlendirme yap
-    2. Dikkat çeken metrikler varsa belirt
-    3. Potansiyel sorunlar varsa uyar
-    4. Performans önerileri sun
-    5. Sonucu HTML formatında döndür (sadece body içeriği)
-    Türkçe yanıt ver."""
+    # Ollama için prompt hazırla
+    prompt = f"""Sen Prometheus metriklerini analiz eden uzman bir sistem yöneticisisin.
+Verilen metrik verilerini analiz et ve şunları yap:
+1. Sistem durumu hakkında genel bir değerlendirme yap
+2. Dikkat çeken metrikler varsa belirt
+3. Potansiyel sorunlar varsa uyar
+4. Performans önerileri sun
+5. Sonucu HTML formatında döndür (sadece body içeriği)
+Türkçe yanıt ver.
 
-    # Kullanıcı mesajı
-    user_message = f"""Aşağıdaki Prometheus metrik verilerini analiz et:
-    
-    Toplam metrik sayısı: {metrics_summary['total_metrics']}
-    Veri içeren metrik sayısı: {metrics_summary['metrics_with_data']}
-    
-    Mevcut metrikler: {', '.join(metrics_summary['sample_metrics'])}
-    
-    Detaylı veri (özet):
-    {json.dumps(dict(list(metrics_data.items())[:5]), indent=2, ensure_ascii=False)[:3000]}...
-    """
+Aşağıdaki Prometheus metrik verilerini analiz et:
 
-    # LLM API isteği
+Toplam metrik sayısı: {metrics_summary['total_metrics']}
+Veri içeren metrik sayısı: {metrics_summary['metrics_with_data']}
+
+Mevcut metrikler: {', '.join(metrics_summary['sample_metrics'])}
+
+Detaylı veri (özet):
+{json.dumps(dict(list(metrics_data.items())[:5]), indent=2, ensure_ascii=False)[:3000]}..."""
+
+    # Ollama API isteği
     payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message}
-        ],
-        "temperature": 0.7,
-        "max_tokens": -1,
-        "stream": False
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 0.7,
+            "num_predict": 2048
+        }
     }
 
-    try:
-        response = requests.post(
-            LLM_URL,
-            headers={"Content-Type": "application/json"},
-            json=payload
-        )
-        response.raise_for_status()
+    # Retry mekanizması ile Ollama'ya bağlan
+    max_retries = 3
+    retry_delay = 5
 
-        result = response.json()
+    for attempt in range(max_retries):
+        try:
+            print(f"Ollama'ya bağlanılıyor... (Deneme {attempt + 1}/{max_retries})")
 
-        if "choices" in result and len(result["choices"]) > 0:
-            analysis = result["choices"][0]["message"]["content"]
-            return analysis
-        else:
-            return None
+            # Önce Ollama'nın hazır olup olmadığını kontrol et
+            health_response = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+            health_response.raise_for_status()
+            print("Ollama servisi hazır, analiz başlatılıyor...")
 
-    except requests.exceptions.RequestException as e:
-        return f"LLM isteği başarısız: {str(e)}"
-    except Exception as e:
-        return f"LLM analizi sırasında hata: {str(e)}"
+            response = requests.post(
+                f"{OLLAMA_URL}/api/generate",
+                headers={"Content-Type": "application/json"},
+                json=payload,
+            )
+            response.raise_for_status()
+
+            result = response.json()
+
+            if "response" in result:
+                print("Ollama analizi başarıyla tamamlandı")
+                return result["response"]
+            else:
+                return "Ollama'dan geçerli bir yanıt alınamadı."
+
+        except requests.exceptions.ConnectionError as e:
+            print(f"Ollama bağlantı hatası (Deneme {attempt + 1}): {str(e)}")
+            if attempt < max_retries - 1:
+                print(f"{retry_delay} saniye bekleniyor...")
+                time.sleep(retry_delay)
+                retry_delay *= 2  # Exponential backoff
+            else:
+                return f"Ollama servisine bağlanılamadı. Lütfen servisin çalıştığından emin olun. Hata: {str(e)}"
+
+        except requests.exceptions.Timeout as e:
+            print(f"Ollama timeout hatası (Deneme {attempt + 1}): {str(e)}")
+            if attempt < max_retries - 1:
+                print(f"{retry_delay} saniye bekleniyor...")
+                time.sleep(retry_delay)
+            else:
+                return f"Ollama analizi zaman aşımına uğradı: {str(e)}"
+
+        except requests.exceptions.RequestException as e:
+            print(f"Ollama isteği başarısız (Deneme {attempt + 1}): {str(e)}")
+            if attempt < max_retries - 1:
+                print(f"{retry_delay} saniye bekleniyor...")
+                time.sleep(retry_delay)
+            else:
+                return f"Ollama isteği başarısız: {str(e)}"
+
+        except Exception as e:
+            print(f"Ollama analizi sırasında beklenmeyen hata: {str(e)}")
+            return f"Ollama analizi sırasında hata: {str(e)}"
+
+    return "Ollama analizi tüm denemelerden sonra başarısız oldu."
 
 def fetch_and_analyze_metrics(max_workers=10):
     """Tüm metrik adlarını çeker, paralel olarak veri alır ve LLM'e gönderir."""
@@ -199,8 +275,8 @@ def fetch_and_analyze_metrics(max_workers=10):
     processed, successful = progress_counter.get_counts()
     
     # LLM analizi
-    analysis = send_metrics_to_llm(all_metrics_data)
-    
+    analysis = send_metrics_to_ollama(all_metrics_data)
+
     result = {
         "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "total_processed": processed,
