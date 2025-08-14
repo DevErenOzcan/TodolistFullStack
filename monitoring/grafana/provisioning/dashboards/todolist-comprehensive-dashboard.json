@@ -1795,9 +1795,9 @@
       },
       "targets": [
         {
-          "expr": "100 - ((node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\"} * 100) / node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\"})",
+          "expr": "100 - ((node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/var\"} * 100) / node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/var\"})",
           "refId": "A",
-          "legendFormat": "Root Disk Usage %"
+          "legendFormat": "Disk Usage %"
         }
       ],
       "title": "Disk Usage",
