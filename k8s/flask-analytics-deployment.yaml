@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: flask-analytics
-        image: erenozcan17/flask_analytics:v3.0
+        image: erenozcan17/flask_analytics:v3.1
         ports:
         - containerPort: 5000
         env:
@@ -26,7 +26,10 @@ spec:
         - name: OLLAMA_URL
           value: "http://ollama-service:11434"
         - name: OLLAMA_MODEL
-          value: "qwen3:latest"
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: OLLAMA_MODEL
         resources:
           requests:
             cpu: 100m

@@ -26,7 +26,10 @@ spec:
         - name: OLLAMA_HOST
           value: "0.0.0.0"
         - name: OLLAMA_MODEL
-          value: "qwen3:latest"
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: OLLAMA_MODEL
         volumeMounts:
         - name: ollama-storage
           mountPath: /root/.ollama
@@ -68,13 +71,6 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
-        resources:
-          requests:
-            cpu: 250m
-            memory: 512Mi
-          limits:
-            cpu: "1"
-            memory: 2Gi
       volumes:
       - name: ollama-storage
         persistentVolumeClaim:

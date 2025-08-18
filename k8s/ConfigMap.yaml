@@ -10,3 +10,4 @@ data:
   BACKEND_PORT: "8080"
   CORS_ALLOW_ORIGINS: "http://todolist.kubernetes.local"
   REACT_APP_API_BASE_URL: "http://todolist.kubernetes.local"
+  OLLAMA_MODEL: "qwen3:0.6b"

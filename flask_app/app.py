@@ -122,7 +122,6 @@ def ensure_ollama_model():
                 f"{OLLAMA_URL}/api/pull",
                 headers={"Content-Type": "application/json"},
                 json=pull_payload,
-                timeout=300  # 5 dakika timeout
             )
 
             if pull_response.status_code == 200:
@@ -153,25 +152,31 @@ def send_metrics_to_ollama(metrics_data):
         "sample_metrics": list(metrics_data.keys())[:10]
     }
 
-    # Ollama için prompt hazırla
-    prompt = f"""Sen Prometheus metriklerini analiz eden uzman bir sistem yöneticisisin.
-Verilen metrik verilerini analiz et ve şunları yap:
-1. Sistem durumu hakkında genel bir değerlendirme yap
-2. Dikkat çeken metrikler varsa belirt
-3. Potansiyel sorunlar varsa uyar
-4. Performans önerileri sun
-5. Sonucu HTML formatında döndür (sadece body içeriği)
-Türkçe yanıt ver.
+    prompt = f"""
+    You are a senior DevOps engineer and Prometheus metrics analysis expert.
+    You are tasked with analyzing the following Prometheus metrics data in detail.
 
-Aşağıdaki Prometheus metrik verilerini analiz et:
+    Perform the following tasks:
+    1. Analyze the system's current state (CPU, memory, disk, network, database, application).
+    2. Identify any unusual patterns or problematic metrics.
+    3. Suggest specific, actionable operational recommendations based on the data.
+       - For example: "The database is under heavy load, consider increasing replica count."
+       - Or: "Backend service X is returning a high rate of 5xx errors, investigate and fix."
+    4. Prioritize issues and clearly highlight urgent ones.
+    5. Respond concisely, using bullet points if needed.
+    6. Respond only in English.
+    7. Output should be formatted in raw HTML (only the contents of <body>, no headers or styles).
 
-Toplam metrik sayısı: {metrics_summary['total_metrics']}
-Veri içeren metrik sayısı: {metrics_summary['metrics_with_data']}
+    Summary:
+    - Total metrics: {metrics_summary['total_metrics']}
+    - Metrics with data: {metrics_summary['metrics_with_data']}
 
-Mevcut metrikler: {', '.join(metrics_summary['sample_metrics'])}
+    Metric sample names:
+    {', '.join(metrics_summary['sample_metrics'])}
 
-Detaylı veri (özet):
-{json.dumps(dict(list(metrics_data.items())[:5]), indent=2, ensure_ascii=False)[:3000]}..."""
+    Detailed metric data:
+    {json.dumps(metrics_data, indent=2, ensure_ascii=False)}
+    """
 
     # Ollama API isteği
     payload = {
