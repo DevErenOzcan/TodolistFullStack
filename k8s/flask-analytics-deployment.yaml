@@ -17,16 +17,12 @@ spec:
     spec:
       containers:
       - name: flask-analytics
-        image: erenozcan17/flask_analytics:v1.6
+        image: erenozcan17/flask_analytics:v3.0
         ports:
         - containerPort: 5000
         env:
         - name: PROMETHEUS_URL
           value: "http://todolist.kubernetes.local/prometheus"
-        - name: LLM_URL
-          value: "http://todolist.kubernetes.local/analytics/engines/v1/"
-        - name: FLASK_APP
-          value: "app.py"
         resources:
           requests:
             cpu: 100m
