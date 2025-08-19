@@ -431,7 +431,7 @@ data:
           "pluginVersion": "11.6.1",
           "targets": [
             {
-              "expr": "avg(probe_success{job=\"todolist-frontend-blackbox\"})",
+              "expr": "avg(up{job=\"todolist-frontend-blackbox\"})",
               "refId": "A"
             }
           ],
