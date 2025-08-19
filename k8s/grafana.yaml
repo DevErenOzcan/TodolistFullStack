@@ -15,6 +15,8 @@ data:
         uid: prometheus
         isDefault: true
         editable: true
+        jsonData:
+          tlsSkipVerify: true
 
 ---
 apiVersion: v1

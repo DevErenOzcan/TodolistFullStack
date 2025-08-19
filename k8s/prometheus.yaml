@@ -32,10 +32,10 @@ data:
           module: [http_2xx]
         static_configs:
           - targets:
-            - https://react-app-service:80
-            - https://react-app-service:80/login
-            - https://react-app-service:80/todos
-            - https://react-app-service:80/steps
+            - https://react-app-service:443
+            - https://react-app-service:443/login
+            - https://react-app-service:443/todos
+            - https://react-app-service:443/steps
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
