@@ -62,8 +62,10 @@ spec:
                 - ping
                 - -h
                 - localhost
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            timeoutSeconds: 5
+            failureThreshold: 3
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
@@ -71,3 +73,47 @@ spec:
         - name: mysql-init-script
           configMap:
             name: mysql-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: todolist
+  labels:
+    app: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  namespace: todolist
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /data/mysql
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: todolist
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: manual
