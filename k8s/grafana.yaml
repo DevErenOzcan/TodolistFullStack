@@ -11,7 +11,7 @@ data:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://todolist.kubernetes.local/prometheus
+        url: https://todolist.kubernetes.local/prometheus
         uid: prometheus
         isDefault: true
         editable: true
@@ -66,7 +66,7 @@ spec:
             - name: GF_USERS_ALLOW_SIGN_UP
               value: "false"
             - name: GF_SERVER_ROOT_URL
-              value: "http://todolist.kubernetes.local/grafana"
+              value: "https://todolist.kubernetes.local/grafana"
             - name: GF_SERVER_SERVE_FROM_SUB_PATH
               value: "true"
           volumeMounts:

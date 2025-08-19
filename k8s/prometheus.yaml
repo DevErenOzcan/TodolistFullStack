@@ -32,10 +32,10 @@ data:
           module: [http_2xx]
         static_configs:
           - targets:
-            - http://react-app-service:80
-            - http://react-app-service:80/login
-            - http://react-app-service:80/todos
-            - http://react-app-service:80/steps
+            - https://react-app-service:80
+            - https://react-app-service:80/login
+            - https://react-app-service:80/todos
+            - https://react-app-service:80/steps
         relabel_configs:
           - source_labels: [__address__]
             target_label: __param_target
@@ -87,7 +87,7 @@ spec:
             - '--web.console.templates=/etc/prometheus/consoles'
             - '--storage.tsdb.retention.time=200h'
             - '--web.enable-lifecycle'
-            - '--web.external-url=http://todolist.kubernetes.local/prometheus'
+            - '--web.external-url=https://todolist.kubernetes.local/prometheus'
             - '--web.route-prefix=/prometheus'
           volumeMounts:
             - name: prometheus-config-volume
@@ -124,4 +124,3 @@ spec:
       protocol: TCP
   selector:
     app: prometheus
-

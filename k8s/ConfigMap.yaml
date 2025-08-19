@@ -8,6 +8,6 @@ data:
   DB_HOST: "mysql-service"
   DB_PORT: "3306"
   BACKEND_PORT: "8080"
-  CORS_ALLOW_ORIGINS: "http://todolist.kubernetes.local"
-  REACT_APP_API_BASE_URL: "http://todolist.kubernetes.local"
+  CORS_ALLOW_ORIGINS: "https://todolist.kubernetes.local"
+  REACT_APP_API_BASE_URL: "https://todolist.kubernetes.local"
   OLLAMA_MODEL: "qwen3:0.6b"

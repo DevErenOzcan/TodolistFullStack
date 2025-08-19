@@ -22,9 +22,9 @@ spec:
         - containerPort: 5000
         env:
         - name: PROMETHEUS_URL
-          value: "http://prometheus-service:9090/prometheus"
+          value: "https://prometheus-service:9090/prometheus"
         - name: OLLAMA_URL
-          value: "http://ollama-service:11434"
+          value: "https://ollama-service:11434"
         - name: OLLAMA_MODEL
           valueFrom:
             configMapKeyRef:
