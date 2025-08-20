@@ -49,9 +49,9 @@ data:
         static_configs:
           - targets: ['blackbox-exporter-service:9115']
 
-      - job_name: 'mysql-exporter'
+      - job_name: 'db-exporter'
         static_configs:
-          - targets: ['mysql-exporter-service:9104']
+          - targets: ['db-exporter-service:9104']
 
       # Node Exporter for System Metrics
       - job_name: 'node-exporter'

@@ -29,15 +29,15 @@ spec:
         app: mysql-exporter
     spec:
       containers:
-        - name: mysql-exporter
+        - name: db-exporter
           image: prom/mysqld-exporter:latest
           ports:
             - containerPort: 9104
           args:
-            - "--config.my-cnf=/etc/mysql-exporter/exporter.cnf"
+            - "--config.my-cnf=/etc/db-exporter/exporter.cnf"
           volumeMounts:
-            - name: mysql-exporter-config
-              mountPath: /etc/mysql-exporter
+            - name: db-exporter-config
+              mountPath: /etc/db-exporter
               readOnly: true
           resources:
             requests:
@@ -59,7 +59,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
       volumes:
-        - name: mysql-exporter-config
+        - name: db-exporter-config
           configMap:
             name: mysql-exporter-config
 ---

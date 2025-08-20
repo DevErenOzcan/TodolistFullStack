@@ -41,7 +41,7 @@ scrape_configs:
     static_configs:
       - targets: ['blackbox:9115']
 
-  - job_name: 'mysql-exporter'
+  - job_name: 'db-exporter'
     static_configs:
       - targets: [ 'todolist_mysqld_exporter:9104' ]
 
