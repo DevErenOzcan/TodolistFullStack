@@ -1,5 +1,8 @@
--- Veritabanını oluştur
-CREATE DATABASE {{ .Values.config.dbName }} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- MySQL exporter kullanıcısını varsa sil ve yeniden oluştur
+DROP USER IF EXISTS '{{ .Values.secrets.exporterUser }}'@'%';
+CREATE USER '{{ .Values.secrets.exporterUser }}'@'%' IDENTIFIED BY '{{ .Values.secrets.exporterPassword }}';
+FLUSH PRIVILEGES;
+
 USE {{ .Values.config.dbName }};
 
 -- users tablosunu oluştur

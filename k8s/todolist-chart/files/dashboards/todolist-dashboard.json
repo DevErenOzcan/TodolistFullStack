@@ -237,7 +237,7 @@
       "pluginVersion": "11.6.1",
       "targets": [
         {
-          "expr": "up{job=\"mysql-exporter\"}",
+          "expr": "up{job=\"db-exporter\"}",
           "refId": "A"
         }
       ],
@@ -792,12 +792,12 @@
       },
       "targets": [
         {
-          "expr": "mysql_global_status_connections{job=\"mysql-exporter\"}",
+          "expr": "mysql_global_status_connections{job=\"db-exporter\"}",
           "refId": "A",
           "legendFormat": "Total Connections"
         },
         {
-          "expr": "mysql_global_status_threads_connected{job=\"mysql-exporter\"}",
+          "expr": "mysql_global_status_threads_connected{job=\"db-exporter\"}",
           "refId": "B",
           "legendFormat": "Active Connections"
         }
@@ -866,12 +866,12 @@
       },
       "targets": [
         {
-          "expr": "rate(mysql_global_status_queries{job=\"mysql-exporter\"}[5m])",
+          "expr": "rate(mysql_global_status_queries{job=\"db-exporter\"}[5m])",
           "refId": "A",
           "legendFormat": "Queries/sec"
         },
         {
-          "expr": "rate(mysql_global_status_questions{job=\"mysql-exporter\"}[5m])",
+          "expr": "rate(mysql_global_status_questions{job=\"db-exporter\"}[5m])",
           "refId": "B",
           "legendFormat": "Questions/sec"
         }
@@ -940,12 +940,12 @@
       },
       "targets": [
         {
-          "expr": "mysql_global_status_innodb_buffer_pool_bytes_data{job=\"mysql-exporter\"}",
+          "expr": "mysql_global_status_innodb_buffer_pool_bytes_data{job=\"db-exporter\"}",
           "refId": "A",
           "legendFormat": "Buffer Pool Data"
         },
         {
-          "expr": "mysql_global_status_innodb_buffer_pool_bytes_dirty{job=\"mysql-exporter\"}",
+          "expr": "mysql_global_status_innodb_buffer_pool_bytes_dirty{job=\"db-exporter\"}",
           "refId": "B",
           "legendFormat": "Buffer Pool Dirty"
         }
@@ -1014,7 +1014,7 @@
       },
       "targets": [
         {
-          "expr": "rate(mysql_global_status_innodb_row_ops_total{job=\"mysql-exporter\"}[5m])",
+          "expr": "rate(mysql_global_status_innodb_row_ops_total{job=\"db-exporter\"}[5m])",
           "refId": "A",
           "legendFormat": "{{operation}}/sec"
         }
@@ -1083,12 +1083,12 @@
       },
       "targets": [
         {
-          "expr": "mysql_global_status_innodb_row_lock_time{job=\"mysql-exporter\"} / mysql_global_status_innodb_row_lock_waits{job=\"mysql-exporter\"}",
+          "expr": "mysql_global_status_innodb_row_lock_time{job=\"db-exporter\"} / mysql_global_status_innodb_row_lock_waits{job=\"db-exporter\"}",
           "refId": "A",
           "legendFormat": "Average Lock Time"
         },
         {
-          "expr": "mysql_global_status_innodb_row_lock_time_max{job=\"mysql-exporter\"}",
+          "expr": "mysql_global_status_innodb_row_lock_time_max{job=\"db-exporter\"}",
           "refId": "B",
           "legendFormat": "Max Lock Time"
         }
