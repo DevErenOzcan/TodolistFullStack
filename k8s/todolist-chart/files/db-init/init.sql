@@ -1,24 +1,8 @@
--- Create database
-CREATE
-DATABASE IF NOT EXISTS {{ .Values.config.dbName }} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE
-{{ .Values.config.dbName }};
+-- Veritabanını oluştur
+CREATE DATABASE {{ .Values.config.dbName }} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE {{ .Values.config.dbName }};
 
--- Create MySQL exporter user for monitoring
-CREATE
-USER IF NOT EXISTS '{{ .Values.secrets.exporterUser }}'@'%' IDENTIFIED BY '{{ .Values.secrets.exporterPassword }}';
-GRANT PROCESS, REPLICATION
-CLIENT ON *.* TO '{{ .Values.secrets.exporterUser }}'@'%';
-GRANT
-SELECT
-ON performance_schema.* TO '{{ .Values.secrets.exporterUser }}'@'%';
-GRANT
-SELECT
-ON information_schema.* TO '{{ .Values.secrets.exporterUser }}'@'%';
-FLUSH
-PRIVILEGES;
-
--- Create users table
+-- users tablosunu oluştur
 CREATE TABLE users
 (
     id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -32,7 +16,7 @@ CREATE TABLE users
     INDEX        idx_users_username (username)
 );
 
--- Create todos table
+-- todos tablosunu oluştur
 CREATE TABLE todos
 (
     id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -47,7 +31,7 @@ CREATE TABLE todos
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
--- Create todo_steps table
+-- todo_steps tablosunu oluştur
 CREATE TABLE todo_steps
 (
     id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -62,22 +46,20 @@ CREATE TABLE todo_steps
     FOREIGN KEY (todo_id) REFERENCES todos (id) ON DELETE CASCADE
 );
 
-{{- if .Values.mysql.init.seedData.enabled }}
--- Insert seed data
--- Create users
-INSERT INTO users (username, password, is_superuser) VALUES
-                                                         ('erenozcan', '123456', FALSE),
-                                                         ('privia', '123456', FALSE),
-                                                         ('admin', '123456', TRUE);
+-- Kullanıcıları ekle
+INSERT INTO users (username, password, is_superuser)
+VALUES ('erenozcan', '123456', FALSE),
+       ('privia', '123456', FALSE),
+       ('admin', '123456', TRUE);
 
--- Create todos for erenozcan (user_id: 1)
+-- erenozcan (user_id: 1) için todoları ekle
 INSERT INTO todos (name, user_id, complete_perc)
 VALUES ('mülakata gir', 1, 0.0),
        ('işe git', 1, 40.0),
        ('kod yaz', 1, 100.0),
        ('proje sunumu', 1, 0.0);
 
--- Create todos for privia (user_id: 2)
+-- privia (user_id: 2) için todoları ekle
 INSERT INTO todos (name, user_id, complete_perc)
 VALUES ('toplantı', 2, 0.0),
        ('rapor yaz', 2, 20.0),
@@ -85,7 +67,7 @@ VALUES ('toplantı', 2, 0.0),
        ('sunum hazırla', 2, 60.0),
        ('yazılım test et', 2, 0.0);
 
--- Create steps for "mülakata gir" (todo_id: 1)
+-- "mülakata gir" (todo_id: 1) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
 VALUES (1, 'özgeçmiş güncelle', TRUE),
        (1, 'şirketi araştır', TRUE),
@@ -93,7 +75,7 @@ VALUES (1, 'özgeçmiş güncelle', TRUE),
        (1, 'kıyafet hazırla', FALSE),
        (1, 'mülakata git', FALSE);
 
--- Create steps for "işe git" (todo_id: 2)
+-- "işe git" (todo_id: 2) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
 VALUES (2, 'alarm kur', TRUE),
        (2, 'kahvaltı yap', TRUE),
@@ -101,15 +83,15 @@ VALUES (2, 'alarm kur', TRUE),
        (2, 'günlük toplantıya katıl', FALSE),
        (2, 'görevleri tamamla', FALSE);
 
--- Create steps for "kod yaz" (todo_id: 3)
+-- "kod yaz" (todo_id: 3) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
-VALUES (3, 'gereksinimları analiz et', TRUE),
+VALUES (3, 'gereksinimleri analiz et', TRUE),
        (3, 'tasarım yap', TRUE),
        (3, 'kodu yaz', TRUE),
        (3, 'test et', TRUE),
        (3, 'kod incelemesi yap', TRUE);
 
--- Create steps for "proje sunumu" (todo_id: 4)
+-- "proje sunumu" (todo_id: 4) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
 VALUES (4, 'sunum içeriğini hazırla', FALSE),
        (4, 'slaytları oluştur', FALSE),
@@ -117,7 +99,7 @@ VALUES (4, 'sunum içeriğini hazırla', FALSE),
        (4, 'sunumu gerçekleştir', FALSE),
        (4, 'geri bildirimleri topla', FALSE);
 
--- Create steps for "toplantı" (todo_id: 5)
+-- "toplantı" (todo_id: 5) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
 VALUES (5, 'katılımcı listesi oluştur', FALSE),
        (5, 'sunum için hazırlık yap', FALSE),
@@ -125,7 +107,7 @@ VALUES (5, 'katılımcı listesi oluştur', FALSE),
        (5, 'katılımcılara toplantı notlarını gönder', FALSE),
        (5, 'toplantıdan sonra özet çıkar', FALSE);
 
--- Create steps for "rapor yaz" (todo_id: 6)
+-- "rapor yaz" (todo_id: 6) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
 VALUES (6, 'başlıkları belirle', TRUE),
        (6, 'verileri topla', FALSE),
@@ -133,7 +115,7 @@ VALUES (6, 'başlıkları belirle', TRUE),
        (6, 'yazmaya başla', FALSE),
        (6, 'son kontrolleri yap', FALSE);
 
--- Create steps for "veri analizi yap" (todo_id: 7)
+-- "veri analizi yap" (todo_id: 7) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
 VALUES (7, 'veri setini incele', TRUE),
        (7, 'veri temizliği yap', TRUE),
@@ -141,7 +123,7 @@ VALUES (7, 'veri setini incele', TRUE),
        (7, 'veri görselleştirme yap', TRUE),
        (7, 'sonuçları yorumla', TRUE);
 
--- Create steps for "sunum hazırla" (todo_id: 8)
+-- "sunum hazırla" (todo_id: 8) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
 VALUES (8, 'konu başlıklarını belirle', TRUE),
        (8, 'görselleri seç', TRUE),
@@ -149,12 +131,10 @@ VALUES (8, 'konu başlıklarını belirle', TRUE),
        (8, 'sunum metni hazırla', FALSE),
        (8, 'son kontrol yap', FALSE);
 
--- Create steps for "yazılım test et" (todo_id: 9)
+-- "yazılım test et" (todo_id: 9) için adımları ekle
 INSERT INTO todo_steps (todo_id, name, is_completed)
 VALUES (9, 'test senaryolarını yaz', FALSE),
        (9, 'yazılımı kur', FALSE),
        (9, 'fonksiyonları test et', FALSE),
        (9, 'hata ayıklama yap', FALSE),
        (9, 'sonuçları raporla', FALSE);
-{{-
-end }}
