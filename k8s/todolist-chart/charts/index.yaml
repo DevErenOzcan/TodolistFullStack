@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  todolist-chart:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-08-21T16:02:52.642127714+03:00"
+    description: A Helm chart for the Todolist Full Stack Application
+    digest: 2122a2b06fa7ccfab5e4e043a0193d3f407e089576dd4adea2802b51ba1d34b6
+    name: todolist-chart
+    type: application
+    urls:
+    - https://deverenozcan.github.io/helm-repo/todolist-chart-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-08-21T16:02:52.641026541+03:00"
