@@ -96,7 +96,11 @@ reactApp:
 ingress:
   enabled: true
   className: "nginx"
-  host: todolist.kubernetes.local
+  # ZORUNLU: Bu değeri, AKS üzerindeki Ingress denetleyicinizin genel IP'sine
+  # işaret eden alan adınız ile değiştirmelisiniz.
+  # Helm kurulumu sırasında bu değeri --set ile belirtin.
+  # Örnek: --set ingress.host=todolist.YOUR_DOMAIN.com
+  host: ""
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "1200"

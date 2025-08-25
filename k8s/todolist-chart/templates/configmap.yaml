@@ -8,6 +8,6 @@ data:
   DB_HOST: {{ .Values.config.dbHost | quote }}
   DB_PORT: {{ .Values.config.dbPort | quote }}
   BACKEND_PORT: {{ .Values.config.backendPort | quote }}
-  CORS_ALLOW_ORIGINS: {{ .Values.ingress.host | quote }}
-  REACT_APP_API_BASE_URL: {{ .Values.ingress.host | quote }}
+  CORS_ALLOW_ORIGINS: "https://{{ .Values.ingress.host }}"
+  REACT_APP_API_BASE_URL: "/api"
   OLLAMA_MODEL: {{ .Values.config.ollamaModel | quote }}
