@@ -19,15 +19,8 @@ RUN npm run build
 # Aşama 2: Build edilmiş dosyaları nginx ile servis et
 FROM nginx:alpine
 
-# envsubst için gettext paketi yükle
-RUN apk add --no-cache gettext
-
-# Nginx konfigürasyon template'ini kopyala
+# Güncellenmiş Nginx konfigürasyonunu kopyala
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Startup script'ini kopyala ve executable yap
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
 
 # Build edilmiş dosyaları nginx'in public dizinine kopyala
 COPY --from=builder /app/build /usr/share/nginx/html
@@ -35,5 +28,5 @@ COPY --from=builder /app/build /usr/share/nginx/html
 # 80 portunu expose et
 EXPOSE 80
 
-# Startup script'i ile nginx'i başlat
-CMD ["/start.sh"]
+# Nginx'i doğrudan ve ön planda başlat (container için standart yöntem)
+CMD ["nginx", "-g", "daemon off;"]
