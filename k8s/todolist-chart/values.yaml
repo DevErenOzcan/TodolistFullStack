@@ -5,8 +5,6 @@ config:
   dbHost: "mysql-service"
   dbPort: "3306"
   backendPort: "8080"
-  corsAllowOrigins: "https://todolist.kubernetes.local"
-  reactAppApiBaseUrl: "https://todolist.kubernetes.local"
   ollamaModel: "qwen3:0.6b"
 
 
