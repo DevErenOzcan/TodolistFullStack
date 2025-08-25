@@ -102,15 +102,10 @@ ingress:
   # Örnek: --set ingress.host=todolist.YOUR_DOMAIN.com
   host: ""
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "1200"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "1200"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "1200"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
-  tls:
-    enabled: true
-    secretName: "tls-secret"
-    createSecret: true
   paths:
     - path: /api
       pathType: Prefix
