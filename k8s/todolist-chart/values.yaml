@@ -58,7 +58,7 @@ goApi:
   replicaCount: 2
   image:
     repository: "erenozcan17/go_backend"
-    tag: "v4.1"
+    tag: "v4.2"
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -76,7 +76,7 @@ reactApp:
   replicaCount: 1
   image:
     repository: "erenozcan17/react_frontend"
-    tag: "v4.1"
+    tag: "v4.5"
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
