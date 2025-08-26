@@ -23,7 +23,7 @@ spec:
             - containerPort: {{ .Values.flaskAnalytics.service.port }}
           env:
             - name: PROMETHEUS_URL
-              value: "http://{{ .Release.Name }}-{{ .Values.flaskAnalytics.prometheus.serviceName }}:{{ .Values.flaskAnalytics.prometheus.port }}"
+              value: "http://{{ .Release.Name }}-{{ .Values.flaskAnalytics.prometheus.serviceName }}:{{ .Values.flaskAnalytics.prometheus.port }}/prometheus"
             - name: OLLAMA_URL
               value: "http://{{ .Release.Name }}-{{ .Values.flaskAnalytics.ollama.serviceName }}:{{ .Values.flaskAnalytics.ollama.port }}"
             - name: OLLAMA_MODEL
