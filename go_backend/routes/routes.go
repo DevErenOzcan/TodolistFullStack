@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"todo_list_project/controllers"
 	"todo_list_project/middleware"
+
+	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // SetupRoutes tüm route'ları yapılandırır
@@ -48,15 +49,4 @@ func SetupRoutes(router *gin.Engine) {
 			stepGroup.DELETE("/:step_id", controller.DeleteStep)
 		}
 	}
-}
-
-// Deprecated: Eski fonksiyonlar - geriye dönük uyumluluk için
-func MainRoutes(router *gin.Engine) {
-	// Bu fonksiyon artık kullanılmıyor, SetupRoutes kullanın
-	SetupRoutes(router)
-}
-
-func Apis(router *gin.Engine) {
-	// Bu fonksiyon artık kullanılmıyor, SetupRoutes kullanın
-	SetupRoutes(router)
 }
