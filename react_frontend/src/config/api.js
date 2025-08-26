@@ -1,6 +1,5 @@
 // API configuration utility
-const API_BASE_URL = "http://localhost:8080/api"; // nginx proxy will handle this
-console.log("Backend Url: " + (API_BASE_URL || 'nginx proxy'))
+const API_BASE_URL = "";
 
 // Helper function to get cookie
 const getCookie = (name) => {
@@ -54,20 +53,13 @@ export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/auth/login`,
 
   // Todo endpoints (JWT required)
-  TODOS: `${API_BASE_URL}/todos`,
-  TODO_BY_ID: (id) => `${API_BASE_URL}/todos/${id}`,
+  TODOS: `${API_BASE_URL}/api/todos`,
+  TODO_BY_ID: (id) => `${API_BASE_URL}/api/todos/${id}`,
 
   // Step endpoints (JWT required)
-  STEPS: `${API_BASE_URL}/steps`,
-  STEPS_BY_TODO_ID: (todoId) => `${API_BASE_URL}/steps/todo/${todoId}`,
-  STEP_BY_ID: (stepId) => `${API_BASE_URL}/steps/${stepId}`,
-
-  // Legacy endpoints (for backward compatibility - can be removed after full React migration)
-  LEGACY: {
-    INDEX: `${API_BASE_URL}/legacy/`,
-    TODO: `${API_BASE_URL}/legacy/todo`,
-    STEP: (todoId) => `${API_BASE_URL}/legacy/todo/${todoId}`
-  }
+  STEPS: `${API_BASE_URL}/api/steps`,
+  STEPS_BY_TODO_ID: (todoId) => `${API_BASE_URL}/api/steps/todo/${todoId}`,
+  STEP_BY_ID: (stepId) => `${API_BASE_URL}/api/steps/${stepId}`,
 };
 
 export default API_ENDPOINTS;
