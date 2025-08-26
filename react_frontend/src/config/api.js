@@ -50,7 +50,7 @@ export const authenticatedFetch = async (url, options = {}) => {
 
 export const API_ENDPOINTS = {
   // Auth endpoints (no JWT required)
-  LOGIN: `${API_BASE_URL}/auth/login`,
+  LOGIN: `${API_BASE_URL}/api/auth/login`,
 
   // Todo endpoints (JWT required)
   TODOS: `${API_BASE_URL}/api/todos`,
